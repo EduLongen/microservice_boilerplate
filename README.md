@@ -32,7 +32,7 @@ Todos os serviços se comunicam via REST e rodam em containers separados.
 
 ---
 
-## ▶Como executar o projeto
+## Como executar o projeto
 
 ### Pré-requisitos
 
