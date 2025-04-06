@@ -1,0 +1,134 @@
+version: "3.8"
+
+services:
+  # Database usuario-service
+  postgres_usuarios:
+    image: postgres:15
+    container_name: postgres_usuarios
+    restart: always
+    environment:
+      POSTGRES_DB: user_usuarios  
+      POSTGRES_USER: user_usuarios
+      POSTGRES_PASSWORD: pass_usuarios
+    ports:
+      - "5433:5432"
+    networks:
+      - rede_servicos
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user_usuarios"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # Database sala-service
+  postgres_salas:
+    image: postgres:15
+    container_name: postgres_salas
+    restart: always
+    environment:
+      POSTGRES_DB: user_salas 
+      POSTGRES_USER: user_salas
+      POSTGRES_PASSWORD: pass_salas
+    ports:
+      - "5434:5432"
+    networks:
+      - rede_servicos
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user_salas"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # Database reserva-service
+  postgres_reservas:
+    image: postgres:15
+    container_name: postgres_reservas
+    restart: always
+    environment:
+      POSTGRES_DB: user_reservas   # Changed from banco_reservas
+      POSTGRES_USER: user_reservas
+      POSTGRES_PASSWORD: pass_reservas
+    ports:
+      - "5435:5432"
+    networks:
+      - rede_servicos
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user_reservas"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  # usuario-service
+  usuario-service:
+    build: ./usuario-service
+    container_name: usuario-service
+    restart: always
+    depends_on:
+      postgres_usuarios:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres_usuarios:5432/user_usuarios
+      SPRING_DATASOURCE_USERNAME: user_usuarios
+      SPRING_DATASOURCE_PASSWORD: pass_usuarios
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_SHOW_SQL: "true"
+      SPRING_JPA_OPEN_IN_VIEW: "false"
+    ports:
+      - "8091:8080"
+    networks:
+      - rede_servicos
+
+  # sala-service
+  sala-service:
+    build: ./sala-service
+    container_name: sala-service
+    restart: always
+    depends_on:
+      postgres_salas:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres_salas:5432/user_salas
+      SPRING_DATASOURCE_USERNAME: user_salas
+      SPRING_DATASOURCE_PASSWORD: pass_salas
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_SHOW_SQL: "true"
+      SPRING_JPA_OPEN_IN_VIEW: "false"
+    ports:
+      - "8092:8080"
+    networks:
+      - rede_servicos
+
+  # reserva-service
+  reserva-service:
+    build: ./reserva-service
+    container_name: reserva-service
+    restart: always
+    depends_on:
+      postgres_reservas:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres_reservas:5432/user_reservas
+      SPRING_DATASOURCE_USERNAME: user_reservas
+      SPRING_DATASOURCE_PASSWORD: pass_reservas
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_SHOW_SQL: "true"
+      SPRING_JPA_OPEN_IN_VIEW: "false"
+    ports:
+      - "8093:8080"
+    networks:
+      - rede_servicos
+  
+  # frontend-service
+  frontend-service:
+    build: ./frontend-service
+    container_name: frontend-service
+    ports:
+      - "8080:80"
+    networks:
+      - rede_servicos
+
+networks:
+  rede_servicos:

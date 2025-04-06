@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Reserva App</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: #f5f5f7;
+      color: #1d1d1f;
+      margin: 0;
+      padding: 2rem;
+    }
+
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
+
+    h2 {
+      font-size: 1.3rem;
+      margin-top: 2rem;
+    }
+
+    form {
+      margin-top: 0.5rem;
+    }
+
+    input, button {
+      padding: 0.5rem;
+      font-size: 1rem;
+      margin-top: 0.3rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    button {
+      background-color: #007aff;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+
+    button:hover {
+      background-color: #005ecb;
+    }
+
+    label {
+      font-weight: 500;
+      display: block;
+      margin-top: 1rem;
+    }
+
+    pre {
+      background-color: #fff;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 1rem;
+      overflow: auto;
+      margin-top: 1rem;
+    }
+
+    .section {
+      background-color: #fff;
+      padding: 1.5rem;
+      border-radius: 12px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      margin-bottom: 2rem;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    hr {
+      border: none;
+      height: 1px;
+      background-color: #ddd;
+      margin: 3rem 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Reserva App</h1>
+
+    <div class="section">
+      <h2>Usuários Cadastrados</h2>
+      <button id="btn-get-users">Atualizar Lista</button>
+      <pre id="users-output"></pre>
+
+      <h2>Novo Usuário</h2>
+      <form id="create-user-form">
+        <label for="nome">Nome</label>
+        <input type="text" id="nome" required>
+
+        <label for="email">Email</label>
+        <input type="text" id="email" required>
+
+        <button type="submit">Cadastrar Usuário</button>
+      </form>
+      <pre id="create-output"></pre>
+    </div>
+
+    <div class="section">
+      <h2>Reservas Realizadas</h2>
+      <button id="btn-get-reservas">Ver Reservas</button>
+      <pre id="reservas-output"></pre>
+
+      <h2>Nova Reserva</h2>
+      <form id="create-reserva-form">
+        <label for="descricao">Descrição</label>
+        <input type="text" id="descricao" required>
+
+        <label for="dataReserva">Data da Reserva</label>
+        <input type="date" id="dataReserva" required>
+
+        <button type="submit">Criar Reserva</button>
+      </form>
+      <pre id="create-reserva-output"></pre>
+    </div>
+
+    <div class="section">
+      <h2>Salas Cadastradas</h2>
+      <button id="btn-get-salas">Ver Salas</button>
+      <pre id="salas-output"></pre>
+
+      <h2>Nova Sala</h2>
+      <form id="create-sala-form">
+        <label for="descricao-sala">Descrição</label>
+        <input type="text" id="descricao-sala" required>
+
+        <label for="dataReserva-sala">Data da Reserva</label>
+        <input type="date" id="dataReserva-sala" required>
+
+        <label for="rua">Rua</label>
+        <input type="text" id="rua" required>
+
+        <label for="numero">Número</label>
+        <input type="text" id="numero" required>
+
+        <label for="cidade">Cidade</label>
+        <input type="text" id="cidade" required>
+
+        <button type="submit">Cadastrar Sala</button>
+      </form>
+      <pre id="create-sala-output"></pre>
+    </div>
+  </div>
+  <script>
+    const getUsersBtn = document.getElementById('btn-get-users');
+    const usersOutput = document.getElementById('users-output');
+
+    const createUserForm = document.getElementById('create-user-form');
+    const createOutput = document.getElementById('create-output');
+
+    // Adjust the base URL to match your container port mapping.
+    // If 'usuario-service' is mapped to 8091, we do:
+    const BASE_URL = "http://localhost:8091/usuarios";
+
+    // GET
+    getUsersBtn.addEventListener('click', async () => {
+      try {
+        const response = await fetch(BASE_URL);
+        if (!response.ok) throw new Error(`Error: ${response.status}`);
+        const data = await response.json();
+        usersOutput.textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        usersOutput.textContent = err.message;
+      }
+    });
+
+    // POST
+    createUserForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const nomeVal = document.getElementById('nome').value;
+      const emailVal = document.getElementById('email').value;
+
+      const payload = { nome: nomeVal, email: emailVal };
+
+      try {
+        const response = await fetch(BASE_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
+        if (!response.ok) throw new Error(`Error: ${response.status}`);
+        const result = await response.json();
+        createOutput.textContent = JSON.stringify(result, null, 2);
+      } catch (err) {
+        createOutput.textContent = err.message;
+      }
+    });
+
+    const getReservasBtn = document.getElementById('btn-get-reservas');
+    const reservasOutput = document.getElementById('reservas-output');
+    const createReservaForm = document.getElementById('create-reserva-form');
+    const createReservaOutput = document.getElementById('create-reserva-output');
+    const BASE_RESERVA_URL = "http://localhost:8093/reservas";
+
+    // GET reservas
+    getReservasBtn.addEventListener('click', async () => {
+      try {
+        const response = await fetch(BASE_RESERVA_URL);
+        if (!response.ok) throw new Error(`Error: ${response.status}`);
+        const data = await response.json();
+        reservasOutput.textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        reservasOutput.textContent = err.message;
+      }
+    });
+
+    // POST reserva
+    createReservaForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const descricaoVal = document.getElementById('descricao').value;
+      const dataReservaVal = document.getElementById('dataReserva').value;
+
+      const payload = { descricao: descricaoVal, dataReserva: dataReservaVal };
+
+      try {
+        const response = await fetch(BASE_RESERVA_URL, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload)
+        });
+        if (!response.ok) throw new Error(`Error: ${response.status}`);
+        const result = await response.json();
+        createReservaOutput.textContent = JSON.stringify(result, null, 2);
+      } catch (err) {
+        createReservaOutput.textContent = err.message;
+      }
+    });
+
+    const getSalasBtn = document.getElementById('btn-get-salas');
+    const salasOutput = document.getElementById('salas-output');
+    const createSalaForm = document.getElementById('create-sala-form');
+    const createSalaOutput = document.getElementById('create-sala-output');
+    const BASE_SALA_URL = "http://localhost:8092/salas";
+
+    getSalasBtn.addEventListener('click', async () => {
+      try {
+        const response = await fetch(BASE_SALA_URL);
+        if (!response.ok) throw new Error(`Error: ${response.status}`);
+        const data = await response.json();
+        salasOutput.textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        salasOutput.textContent = err.message;
+      }
+    });
+
+    createSalaForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const payload = {
+        descricao: document.getElementById('descricao-sala').value,
+        dataReserva: document.getElementById('dataReserva-sala').value,
+        endereco: {
+          rua: document.getElementById('rua').value,
+          numero: document.getElementById('numero').value,
+          cidade: document.getElementById('cidade').value
+        }
+      };
+
+      try {
+        const response = await fetch(BASE_SALA_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (!response.ok) throw new Error(`Error: ${response.status}`);
+        const result = await response.json();
+        createSalaOutput.textContent = JSON.stringify(result, null, 2);
+      } catch (err) {
+        createSalaOutput.textContent = err.message;
+      }
+    });
+  </script>
+</body>
+</html>
