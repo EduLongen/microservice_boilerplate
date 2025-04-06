@@ -42,4 +42,4 @@ Todos os serviços se comunicam via REST e rodam em containers separados.
 ### Subir o projeto
 
 ```bash
-docker compose up --build# microservice_boilerplate
+docker compose up --build
